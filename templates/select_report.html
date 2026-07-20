@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Trivy Scan Reports</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+      background: #f9f9f9;
+    }
+
+    h1 {
+      margin-bottom: 1em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2em;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007bff;
+    }
+
+    .severity-summary {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .low {
+      color: #999;
+    }
+
+    .medium {
+      color: #e6a700;
+    }
+
+    .high {
+      color: #d9534f;
+      font-weight: bold;
+    }
+
+    .critical {
+      color: #800;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .filter-form {
+      margin-bottom: 1em;
+      display: flex;
+      gap: 1em;
+      align-items: center;
+    }    
+  </style>
+</head>
+
+<body>
+  <h1>Select a Trivy Scan Report</h1>
+
+
+
+
+
+  <form method="get" class="filter-form">
+  <label for="project">Project:</label>
+  <select name="project" id="project">
+    <option value="">All</option>
+    {% for name in project_names %}
+      <option value="{{ name }}" {% if name == selected_project %}selected{% endif %}>{{ name }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit">Filter</button>
+</form>
+
+
+
+
+  <h2>Filesystem Vulnerability Reports</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Commit</th>
+        <th>Tag</th>
+        <th>Generated</th>
+        <th>Vulnerabilities</th>
+        <th>Misconfigurations</th>
+        <th>Secrets</th>
+        <th>View</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in vuln_reports %}
+      <tr>
+        <td>{{ report.project or "Unnamed" }}</td>
+        <td>{{ report.commit or "not set" }}</td>
+        <td>{{ report.tag or "not set" }}</td>
+        <td>{{ report.generated_at.strftime('%Y-%m-%d %H:%M') if report.generated_at else "unknown" }}</td>
+        <td class="severity-summary">
+          {% set counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0} %}
+          {% for result in report.results %}
+            {% for vuln in result.vulnerabilities %}
+              {% set severity = vuln.severity %}
+              {% if severity in counts %}
+                {% set _ = counts.update({severity: counts[severity] + 1}) %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% for level, count in counts.items() %}
+            {% if count > 0 %}
+              <span class="{{ level|lower }}">{{ level }}: {{ count }}</span><br>
+            {% endif %}
+          {% endfor %}
+        </td>
+        <td class="severity-summary">
+          {% set counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0} %}
+          {% for result in report.results %}
+            {% for vuln in result.misconfigurations %}
+              {% set severity = vuln.severity %}
+              {% if severity in counts %}
+                {% set _ = counts.update({severity: counts[severity] + 1}) %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% for level, count in counts.items() %}
+            {% if count > 0 %}
+              <span class="{{ level|lower }}">{{ level }}: {{ count }}</span><br>
+            {% endif %}
+          {% endfor %}
+        </td>
+
+        <td class="severity-summary">
+          {% set counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0} %}
+          {% for result in report.results %}
+            {% for vuln in result.secrets %}
+              {% set severity = vuln.severity %}
+              {% if severity in counts %}
+                {% set _ = counts.update({severity: counts[severity] + 1}) %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% for level, count in counts.items() %}
+            {% if count > 0 %}
+              <span class="{{ level|lower }}">{{ level }}: {{ count }}</span><br>
+            {% endif %}
+          {% endfor %}
+        </td>
+
+        <td><a href="{{ url_for('ui.show_report', report_id=report.id, project=selected_project) }}">View →</a></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6"><em>No reports found.</em></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+    <h2>Docker Image Reports</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Commit</th>
+        <th>Tag</th>
+        <th>Generated</th>
+        <th>Artifact Name</th>
+        <th>Image ID</th>
+        <th>OS</th>
+        <th>Vulnerabilities</th>
+        <th>Misconfigurations</th>
+        <th>Secrets</th>
+        <th>View</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in image_reports %}
+      <tr>
+        <td>{{ report.project or "Unnamed" }}</td>
+        <td>{{ report.commit or "not set" }}</td>
+        <td>{{ report.tag or "not set" }}</td>
+        <td>{{ report.generated_at.strftime('%Y-%m-%d %H:%M') if report.generated_at else "unknown" }}</td>
+        <td>{{ report.artifact_name or "unknown" }}</td>
+        <td>{{ (report.image_id or "N/A")|truncate(20) }}</td>
+        <td>{{ report.os or "N/A" }}</td>
+        <td class="severity-summary">
+          {% set counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0} %}
+          {% for result in report.results %}
+            {% for vuln in result.vulnerabilities %}
+              {% set severity = vuln.severity %}
+              {% if severity in counts %}
+                {% set _ = counts.update({severity: counts[severity] + 1}) %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% for level, count in counts.items() %}
+            {% if count > 0 %}
+              <span class="{{ level|lower }}">{{ level }}: {{ count }}</span><br>
+            {% endif %}
+          {% endfor %}
+        </td>
+        <td class="severity-summary">
+          {% set counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0} %}
+          {% for result in report.results %}
+            {% for vuln in result.misconfigurations %}
+              {% set severity = vuln.severity %}
+              {% if severity in counts %}
+                {% set _ = counts.update({severity: counts[severity] + 1}) %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% for level, count in counts.items() %}
+            {% if count > 0 %}
+              <span class="{{ level|lower }}">{{ level }}: {{ count }}</span><br>
+            {% endif %}
+          {% endfor %}
+        </td>
+
+        <td class="severity-summary">
+          {% set counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0} %}
+          {% for result in report.results %}
+            {% for vuln in result.secrets %}
+              {% set severity = vuln.severity %}
+              {% if severity in counts %}
+                {% set _ = counts.update({severity: counts[severity] + 1}) %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% for level, count in counts.items() %}
+            {% if count > 0 %}
+              <span class="{{ level|lower }}">{{ level }}: {{ count }}</span><br>
+            {% endif %}
+          {% endfor %}
+        </td>
+
+        <td><a href="{{ url_for('ui.show_report', report_id=report.id, project=selected_project) }}">View →</a></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6"><em>No reports found.</em></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+
+</html>

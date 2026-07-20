@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Trivy Report — {{ report.project or "Unnamed Project" }}</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+      background: #f9f9f9;
+    }
+
+    h1,
+    h2 {
+      margin-bottom: 0.5em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2em;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    .severity-LOW {
+      background-color: #e0e0e0;
+    }
+
+    .severity-MEDIUM {
+      background-color: #fff3cd;
+    }
+
+    .severity-HIGH {
+      background-color: #f8d7da;
+    }
+
+    .severity-CRITICAL {
+      background-color: #f5c6cb;
+      font-weight: bold;
+    }
+
+    .meta {
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 1em;
+    }
+
+    a.back {
+      display: inline-block;
+      margin-bottom: 1em;
+      text-decoration: none;
+      color: #007bff;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="{{ url_for('ui.splash') }}" class="back">← Back to report list</a>
+
+  <h1>{{ report.project or "Unnamed Project" }}</h1>
+  <div class="meta">
+    <strong>Generated:</strong> {{ report.generated_at.strftime('%Y-%m-%d %H:%M') if report.generated_at else "unknown"
+    }}<br>
+    <strong>Schema Version:</strong> {{ report.schema_version or "N/A" }}
+  </div>
+
+  {% for result in report.results %}
+  <h2>Target: {{ result.target }}</h2>
+  <div class="meta">
+    <strong>Class:</strong> {{ result.class_ }} |
+    <strong>Type:</strong> {{ result.type or "N/A" }}
+  </div>
+
+
+  {% if result.vulnerabilities %}
+  <table>
+    <thead>
+      <tr>
+        <th>Severity</th>
+        <th>Vulnerability ID</th>
+        <th>Package</th>
+        <th>Installed</th>
+        <th>Fixed</th>
+        <th>Title</th>
+        <th>References</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for vuln in result.vulnerabilities %}
+      <tr class="severity-{{ vuln.severity }}">
+        <td>{{ vuln.severity }}</td>
+        <td>{{ vuln.vuln_id }}</td>
+        <td>{{ vuln.pkg_name }}</td>
+        <td>{{ vuln.installed_version }}</td>
+        <td>{{ vuln.fixed_version or "N/A" }}</td>
+        <td>{{ vuln.title }}</td>
+        <td>
+          {% for ref in vuln.references.split(', ') %}
+          <a href="{{ ref }}" target="_blank">{{ ref|replace('https://','')|replace('http://','')|truncate(50)
+            }}</a><br>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p><em>No vulnerabilities found.</em></p>
+  {% endif %}
+
+  {% if result.misconfigurations %}
+  <h3>Misconfigurations</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Severity</th>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Message</th>
+        <th>Resolution</th>
+        <th>References</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for misconf in result.misconfigurations %}
+      <tr class="severity-{{ misconf.severity }}">
+        <td>{{ misconf.severity }}</td>
+        <td>{{ misconf.id_code }}</td>
+        <td>{{ misconf.title }}</td>
+        <td>{{ misconf.message }}</td>
+        <td>{{ misconf.resolution or "—" }}</td>
+        <td>
+          {% for ref in misconf.references.split(', ') %}
+          <a href="{{ ref }}" target="_blank">{{ ref|replace('https://','')|replace('http://','')|truncate(50)
+            }}</a><br>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if result.secrets %}
+  <h3>Secrets</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Severity</th>
+        <th>Rule ID</th>
+        <th>Category</th>
+        <th>Title</th>
+        <th>Match</th>
+        <th>File</th>
+        <th>Lines</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for secret in result.secrets %}
+      <tr class="severity-{{ secret.severity }}">
+        <td>{{ secret.severity }}</td>
+        <td>{{ secret.rule_id }}</td>
+        <td>{{ secret.category }}</td>
+        <td>{{ secret.title }}</td>
+        <td>{{ secret.match }}</td>
+        <td>{{ secret.file_path }}</td>
+        <td>{{ secret.start_line }}–{{ secret.end_line }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% endfor %}
+</body>
+
+</html>
