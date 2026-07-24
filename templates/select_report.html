@@ -66,11 +66,40 @@
       display: flex;
       gap: 1em;
       align-items: center;
-    }    
+    }
+
+    .pager {
+      margin: -1em 0 2em;
+      display: flex;
+      gap: 1em;
+      align-items: center;
+    }
+
+    .pager .disabled {
+      color: #999;
+      pointer-events: none;
+    }
   </style>
 </head>
 
 <body>
+
+  {% macro pager(pagination, page_param) %}
+  <div class="pager">
+    {% if pagination.has_prev %}
+      <a href="{{ url_for('ui.splash', **dict(request.args, **{page_param: pagination.prev_num})) }}">&larr; Previous</a>
+    {% else %}
+      <span class="disabled">&larr; Previous</span>
+    {% endif %}
+    <span>Page {{ pagination.page }} of {{ pagination.pages or 1 }} ({{ pagination.total }} reports)</span>
+    {% if pagination.has_next %}
+      <a href="{{ url_for('ui.splash', **dict(request.args, **{page_param: pagination.next_num})) }}">Next &rarr;</a>
+    {% else %}
+      <span class="disabled">Next &rarr;</span>
+    {% endif %}
+  </div>
+  {% endmacro %}
+
   <h1>Select a Trivy Scan Report</h1>
 
 
@@ -83,6 +112,13 @@
     <option value="">All</option>
     {% for name in project_names %}
       <option value="{{ name }}" {% if name == selected_project %}selected{% endif %}>{{ name }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="per_page">Per page:</label>
+  <select name="per_page" id="per_page">
+    {% for size in allowed_per_page %}
+      <option value="{{ size }}" {% if size == per_page %}selected{% endif %}>{{ size }}</option>
     {% endfor %}
   </select>
 
@@ -172,7 +208,7 @@
       {% endfor %}
     </tbody>
   </table>
-
+  {{ pager(vuln_pagination, 'vuln_page') }}
 
     <h2>Docker Image Reports</h2>
   <table>
@@ -260,6 +296,7 @@
       {% endfor %}
     </tbody>
   </table>
+  {{ pager(image_pagination, 'image_page') }}
 </body>
 
 </html>

@@ -66,14 +66,16 @@ Copy `.env.example` to `.env` and fill in real values:
 ### Run with Docker
 
 ```bash
-docker build -t trivy-reports .
 docker run -d \
   --name trivy-reports \
   -p 127.0.0.1:8000:8000 \
   -v "$(pwd)/instance:/app/instance" \
   -v "$(pwd)/.env:/app/.env:ro" \
-  trivy-reports
+  ghcr.io/kbechler/trivy-reports:latest
 ```
+
+Pinned versions are tagged without the `v` prefix (e.g. pushing git tag `v0.0.1` publishes
+`ghcr.io/kbechler/trivy-reports:0.0.1`), matching the convention of most public Docker images.
 
 ### Run locally
 
