@@ -13,6 +13,7 @@
   --severity-medium-bg: #fff3cd;
   --severity-high-bg: #f8d7da;
   --severity-critical-bg: #f5c6cb;
+  --link-bg: #e6f2ff;
 }
 
 [data-theme="dark"] {
@@ -30,6 +31,7 @@
   --severity-medium-bg: #4d452a;
   --severity-high-bg: #4d2a2a;
   --severity-critical-bg: #5c2020;
+  --link-bg: #1e3a5c;
 }
 
 body {
@@ -67,7 +69,7 @@ a {
   color: var(--link);
 }
 
-a.back {
+.back {
   display: inline-block;
   margin-right: 1em;
   margin-bottom: 1em;
@@ -137,6 +139,37 @@ a.back {
 .pager .disabled {
   color: var(--muted);
   pointer-events: none;
+}
+
+.inline-form {
+  display: inline-block;
+}
+
+.btn-outline {
+  display: inline-block;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0.4em 0.8em;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+}
+
+.btn-outline.primary {
+  color: var(--link);
+}
+
+.btn-outline.primary:hover {
+  background: var(--link-bg);
+}
+
+.btn-outline.danger {
+  color: var(--high);
+}
+
+.btn-outline.danger:hover {
+  background: var(--severity-high-bg);
 }
 
 .theme-toggle {

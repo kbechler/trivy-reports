@@ -21,6 +21,8 @@ scrolling through raw JSON in a build log, you get a searchable history of scans
   (Critical → High → Medium → Low).
 - Light/dark theme toggle, following the browser's `prefers-color-scheme` by default and
   remembering the user's choice in `localStorage`.
+- Delete a stored report (with a confirmation prompt), cascading to its results,
+  vulnerabilities, misconfigurations, and secret findings.
 - Stateless app process — all state lives in the database, so the container can be recreated
   freely as long as the volume/DB is persisted.
 
@@ -119,7 +121,8 @@ report. Trivy's JSON `SchemaVersion` must be `2`, and `ArtifactType` must be `fi
 
 Open `/ui` (Basic Auth, user `admin`) to see two tables — filesystem scans and image scans —
 filterable by project, each linking to a per-report detail page with full vulnerability,
-misconfiguration, and secret listings.
+misconfiguration, and secret listings. The detail page has a delete button (with a confirmation
+prompt) that permanently removes the report and its findings.
 
 ### Health check
 
@@ -141,10 +144,9 @@ This is a deliberately small, single-purpose project — a few things are simpli
 Not implemented yet, but planned next:
 
 - **Multi-user accounts with roles** — replace the single `admin` / `ADMIN_PASSWORD` Basic Auth
-  user with a proper user table supporting several accounts in two roles: `user` (read-only,
-  today's behavior) and `admin` (read-only plus deleting reports).
-- **Delete reports** — admins will be able to delete a stored report, cascading to its results,
-  vulnerabilities, misconfigurations, and secret findings.
+  user with a proper user table supporting several accounts in two roles: `user` (read-only) and
+  `admin` (read-only plus deleting reports). Until this lands, deletion is available to anyone
+  who can authenticate to `/ui`, since there's only the one Basic Auth user.
 
 ## License
 

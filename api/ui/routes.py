@@ -2,7 +2,7 @@
 import csv
 import io
 
-from flask import render_template, request, Response
+from flask import render_template, request, Response, redirect, url_for
 from weasyprint import HTML
 from werkzeug.utils import secure_filename
 
@@ -75,6 +75,13 @@ def register_routes(bp):
         return Response(pdf_bytes, mimetype='application/pdf', headers={
             'Content-Disposition': f'attachment; filename="{_report_filename(report, "pdf")}"'
         })
+
+    @bp.route('/report/<int:report_id>/delete', methods=['POST'])
+    def delete_report(report_id):
+        report = ScanReport.query.get_or_404(report_id)
+        db.session.delete(report)
+        db.session.commit()
+        return redirect(url_for('ui.splash'))
 
     @bp.route('/report/<int:report_id>/export.csv')
     def export_report_csv(report_id):
