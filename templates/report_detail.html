@@ -2,6 +2,17 @@
 
 {% block title %}Trivy Report — {{ report.project or "Unnamed Project" }}{% endblock %}
 
+{% macro render_references(refs_string, limit=5) %}
+  {% set refs = refs_string.split(', ') if refs_string else [] %}
+  {% for ref in refs[:limit] %}
+  <a href="{{ ref }}" target="_blank">{{ ref|replace('https://','')|replace('http://','')|truncate(50)
+    }}</a><br>
+  {% endfor %}
+  {% if refs|length > limit %}
+  <em>+ {{ refs|length - limit }} more (see CSV export)</em>
+  {% endif %}
+{% endmacro %}
+
 {% block content %}
   <div class="no-print">
     <a href="{{ url_for('ui.splash') }}" class="back">← Back to report list</a>
@@ -51,12 +62,7 @@
         <td>{{ vuln.installed_version }}</td>
         <td>{{ vuln.fixed_version or "N/A" }}</td>
         <td>{{ vuln.title }}</td>
-        <td>
-          {% for ref in vuln.references.split(', ') %}
-          <a href="{{ ref }}" target="_blank">{{ ref|replace('https://','')|replace('http://','')|truncate(50)
-            }}</a><br>
-          {% endfor %}
-        </td>
+        <td>{{ render_references(vuln.references) }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -86,12 +92,7 @@
         <td>{{ misconf.title }}</td>
         <td>{{ misconf.message }}</td>
         <td>{{ misconf.resolution or "—" }}</td>
-        <td>
-          {% for ref in misconf.references.split(', ') %}
-          <a href="{{ ref }}" target="_blank">{{ ref|replace('https://','')|replace('http://','')|truncate(50)
-            }}</a><br>
-          {% endfor %}
-        </td>
+        <td>{{ render_references(misconf.references) }}</td>
       </tr>
       {% endfor %}
     </tbody>
