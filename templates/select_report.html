@@ -1,88 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Trivy Scan Reports</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 2em;
-      background: #f9f9f9;
-    }
+{% block title %}Trivy Scan Reports{% endblock %}
 
-    h1 {
-      margin-bottom: 1em;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 2em;
-    }
-
-    th,
-    td {
-      border: 1px solid #ccc;
-      padding: 0.5em;
-      text-align: left;
-    }
-
-    th {
-      background-color: #eee;
-    }
-
-    a {
-      text-decoration: none;
-      color: #007bff;
-    }
-
-    .severity-summary {
-      font-size: 0.9em;
-      color: #555;
-    }
-
-    .low {
-      color: #999;
-    }
-
-    .medium {
-      color: #e6a700;
-    }
-
-    .high {
-      color: #d9534f;
-      font-weight: bold;
-    }
-
-    .critical {
-      color: #800;
-      font-weight: bold;
-      text-decoration: underline;
-    }
-
-    .filter-form {
-      margin-bottom: 1em;
-      display: flex;
-      gap: 1em;
-      align-items: center;
-    }
-
-    .pager {
-      margin: -1em 0 2em;
-      display: flex;
-      gap: 1em;
-      align-items: center;
-    }
-
-    .pager .disabled {
-      color: #999;
-      pointer-events: none;
-    }
-  </style>
-</head>
-
-<body>
+{% block content %}
 
   {% macro pager(pagination, page_param) %}
   <div class="pager">
@@ -102,10 +22,6 @@
 
   <h1>Select a Trivy Scan Report</h1>
 
-
-
-
-
   <form method="get" class="filter-form">
   <label for="project">Project:</label>
   <select name="project" id="project">
@@ -124,9 +40,6 @@
 
   <button type="submit">Filter</button>
 </form>
-
-
-
 
   <h2>Filesystem Vulnerability Reports</h2>
   <table>
@@ -297,6 +210,4 @@
     </tbody>
   </table>
   {{ pager(image_pagination, 'image_page') }}
-</body>
-
-</html>
+{% endblock %}

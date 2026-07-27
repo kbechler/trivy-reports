@@ -1,0 +1,180 @@
+:root {
+  --bg: #f9f9f9;
+  --fg: #222;
+  --border: #ccc;
+  --th-bg: #eee;
+  --link: #007bff;
+  --muted: #555;
+  --low: #999;
+  --medium: #e6a700;
+  --high: #d9534f;
+  --critical: #800;
+  --severity-low-bg: #e0e0e0;
+  --severity-medium-bg: #fff3cd;
+  --severity-high-bg: #f8d7da;
+  --severity-critical-bg: #f5c6cb;
+}
+
+[data-theme="dark"] {
+  --bg: #1e1e1e;
+  --fg: #e0e0e0;
+  --border: #444;
+  --th-bg: #2a2a2a;
+  --link: #4da3ff;
+  --muted: #aaa;
+  --low: #999;
+  --medium: #e0b34d;
+  --high: #ff6b6b;
+  --critical: #ff6666;
+  --severity-low-bg: #333333;
+  --severity-medium-bg: #4d452a;
+  --severity-high-bg: #4d2a2a;
+  --severity-critical-bg: #5c2020;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 2em;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+h1,
+h2,
+h3 {
+  margin-bottom: 0.5em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2em;
+}
+
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 0.5em;
+  text-align: left;
+}
+
+th {
+  background-color: var(--th-bg);
+}
+
+a {
+  text-decoration: none;
+  color: var(--link);
+}
+
+a.back {
+  display: inline-block;
+  margin-right: 1em;
+  margin-bottom: 1em;
+}
+
+.severity-summary {
+  font-size: 0.9em;
+  color: var(--muted);
+}
+
+.low {
+  color: var(--low);
+}
+
+.medium {
+  color: var(--medium);
+}
+
+.high {
+  color: var(--high);
+  font-weight: bold;
+}
+
+.critical {
+  color: var(--critical);
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.severity-LOW {
+  background-color: var(--severity-low-bg);
+}
+
+.severity-MEDIUM {
+  background-color: var(--severity-medium-bg);
+}
+
+.severity-HIGH {
+  background-color: var(--severity-high-bg);
+}
+
+.severity-CRITICAL {
+  background-color: var(--severity-critical-bg);
+  font-weight: bold;
+}
+
+.meta {
+  font-size: 0.9em;
+  color: var(--muted);
+  margin-bottom: 1em;
+}
+
+.filter-form {
+  margin-bottom: 1em;
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
+.pager {
+  margin: -1em 0 2em;
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
+.pager .disabled {
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 1em;
+  right: 1em;
+  font-size: 1.2em;
+  line-height: 1;
+  padding: 0.4em 0.6em;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--th-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 1.5cm;
+  }
+
+  .no-print {
+    display: none;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  table {
+    table-layout: fixed;
+  }
+
+  th,
+  td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 0.85em;
+  }
+}

@@ -1,98 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Trivy Report — {{ report.project or "Unnamed Project" }}</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 2em;
-      background: #f9f9f9;
-    }
+{% block title %}Trivy Report — {{ report.project or "Unnamed Project" }}{% endblock %}
 
-    h1,
-    h2 {
-      margin-bottom: 0.5em;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 2em;
-    }
-
-    th,
-    td {
-      border: 1px solid #ccc;
-      padding: 0.5em;
-      text-align: left;
-    }
-
-    th {
-      background-color: #eee;
-    }
-
-    .severity-LOW {
-      background-color: #e0e0e0;
-    }
-
-    .severity-MEDIUM {
-      background-color: #fff3cd;
-    }
-
-    .severity-HIGH {
-      background-color: #f8d7da;
-    }
-
-    .severity-CRITICAL {
-      background-color: #f5c6cb;
-      font-weight: bold;
-    }
-
-    .meta {
-      font-size: 0.9em;
-      color: #555;
-      margin-bottom: 1em;
-    }
-
-    a.back {
-      display: inline-block;
-      margin-right: 1em;
-      margin-bottom: 1em;
-      text-decoration: none;
-      color: #007bff;
-    }
-
-    @media print {
-      @page {
-        size: A4 landscape;
-        margin: 1.5cm;
-      }
-
-      .no-print {
-        display: none;
-      }
-
-      body {
-        margin: 0;
-      }
-
-      table {
-        table-layout: fixed;
-      }
-
-      th,
-      td {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        font-size: 0.85em;
-      }
-    }
-  </style>
-</head>
-
-<body>
+{% block content %}
   <div class="no-print">
     <a href="{{ url_for('ui.splash') }}" class="back">← Back to report list</a>
     <a href="{{ url_for('ui.export_report_pdf', report_id=report.id) }}" class="back">⭳ Export PDF</a>
@@ -215,6 +125,4 @@
   {% endif %}
 
   {% endfor %}
-</body>
-
-</html>
+{% endblock %}

@@ -19,6 +19,8 @@ scrolling through raw JSON in a build log, you get a searchable history of scans
 - Stores vulnerabilities, misconfigurations, and secret findings as separate, queryable records.
 - Web UI with a project filter and per-report drill-down, sorted by severity
   (Critical → High → Medium → Low).
+- Light/dark theme toggle, following the browser's `prefers-color-scheme` by default and
+  remembering the user's choice in `localStorage`.
 - Stateless app process — all state lives in the database, so the container can be recreated
   freely as long as the volume/DB is persisted.
 
@@ -37,6 +39,7 @@ scrolling through raw JSON in a build log, you get a searchable history of scans
 ├── models/
 │   └── reports.py       # ScanReport / ScanResult / Vulnerability / Misconfiguration / SecretFinding
 ├── templates/           # Jinja2 templates for the UI
+├── static/              # CSS for the UI (incl. light/dark theme)
 └── Dockerfile
 ```
 
@@ -142,7 +145,6 @@ Not implemented yet, but planned next:
   today's behavior) and `admin` (read-only plus deleting reports).
 - **Delete reports** — admins will be able to delete a stored report, cascading to its results,
   vulnerabilities, misconfigurations, and secret findings.
-- **Dark theme** — a CSS `prefers-color-scheme`-based dark mode for the UI.
 
 ## License
 
