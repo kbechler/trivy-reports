@@ -6,7 +6,8 @@ RUN addgroup -g 9000 app \
 WORKDIR /app
 COPY requirements.txt requirements.txt
 
-RUN pip3 install -r requirements.txt
+RUN apk add --no-cache pango fontconfig ttf-freefont \
+    && pip3 install -r requirements.txt
 
 COPY --chown=app:app . .
 USER app

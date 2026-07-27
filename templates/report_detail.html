@@ -58,15 +58,46 @@
 
     a.back {
       display: inline-block;
+      margin-right: 1em;
       margin-bottom: 1em;
       text-decoration: none;
       color: #007bff;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 1.5cm;
+      }
+
+      .no-print {
+        display: none;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      table {
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        font-size: 0.85em;
+      }
     }
   </style>
 </head>
 
 <body>
-  <a href="{{ url_for('ui.splash') }}" class="back">← Back to report list</a>
+  <div class="no-print">
+    <a href="{{ url_for('ui.splash') }}" class="back">← Back to report list</a>
+    <a href="{{ url_for('ui.export_report_pdf', report_id=report.id) }}" class="back">⭳ Export PDF</a>
+    <a href="{{ url_for('ui.export_report_csv', report_id=report.id) }}" class="back">⭳ Export CSV</a>
+  </div>
 
   <h1>{{ report.project or "Unnamed Project" }}</h1>
   <div class="meta">
