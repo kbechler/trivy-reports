@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from models.reports import ScanReport
 from extensions import db
+from auth import require_role
 
 DEFAULT_PER_PAGE = 20
 ALLOWED_PER_PAGE = [20, 50, 100]
@@ -77,6 +78,7 @@ def register_routes(bp):
         })
 
     @bp.route('/report/<int:report_id>/delete', methods=['POST'])
+    @require_role('admin')
     def delete_report(report_id):
         report = ScanReport.query.get_or_404(report_id)
         db.session.delete(report)

@@ -19,6 +19,8 @@ scrolling through raw JSON in a build log, you get a searchable history of scans
 - Stores vulnerabilities, misconfigurations, and secret findings as separate, queryable records.
 - Web UI with a project filter and per-report drill-down, sorted by severity
   (Critical → High → Medium → Low).
+- Multi-user accounts with two roles: `user` (read-only) and `admin` (read-only plus deleting
+  reports), authenticated via per-user HTTP Basic Auth credentials.
 - Light/dark theme toggle, following the browser's `prefers-color-scheme` by default and
   remembering the user's choice in `localStorage`.
 - Delete a stored report (with a confirmation prompt), cascading to its results,
@@ -32,14 +34,17 @@ scrolling through raw JSON in a build log, you get a searchable history of scans
 .
 ├── app.py               # Flask application factory
 ├── wsgi.py              # Gunicorn entrypoint (imports create_app())
-├── auth.py              # before_request hook: token auth for /v1, Basic Auth for /ui
-├── errors.py            # JSON error handlers (400/404/405/415)
+├── auth.py              # before_request hook: token auth for /v1, per-user Basic Auth for /ui,
+│                        # plus the require_role() route decorator
+├── cli.py               # `flask create-user` / `delete-user` / `list-users` commands
+├── errors.py            # JSON error handlers (400/403/404/405/415)
 ├── extensions.py        # shared Flask-SQLAlchemy instance
 ├── api/
 │   ├── v1/              # upload API blueprint
 │   └── ui/              # web UI blueprint
 ├── models/
-│   └── reports.py       # ScanReport / ScanResult / Vulnerability / Misconfiguration / SecretFinding
+│   ├── reports.py       # ScanReport / ScanResult / Vulnerability / Misconfiguration / SecretFinding
+│   └── users.py         # User (username, password_hash, role)
 ├── templates/           # Jinja2 templates for the UI
 ├── static/              # CSS for the UI (incl. light/dark theme)
 └── Dockerfile
@@ -65,8 +70,20 @@ Copy `.env.example` to `.env` and fill in real values:
 |-----------------------------|---------------------------------------------------------------------|
 | `SQLALCHEMY_DATABASE_URI`   | DB connection string. Defaults to a local SQLite file.              |
 | `UPLOAD_TOKEN`              | Shared secret required in the `X-Access-Token` header for uploads.  |
-| `ADMIN_PASSWORD`            | Password for the `admin` user on the `/ui` Basic Auth prompt.        |
 | `FLASK_ENV` / `FLASK_DEBUG` | Standard Flask environment flags.                                   |
+
+`/ui` accounts are not set via `.env` — they live in the database. Manage them with:
+
+```bash
+flask create-user <username> <user|admin>
+flask delete-user <username>
+flask list-users
+```
+
+`create-user` prompts for a password (hidden, with confirmation) and stores it hashed.
+`delete-user` prompts for a yes/no confirmation before removing the account. `list-users`
+prints `username<TAB>role`, one account per line, sorted by username. `user` accounts are
+read-only; `admin` accounts can additionally delete reports.
 
 ### Run with Docker
 
@@ -119,10 +136,12 @@ report. Trivy's JSON `SchemaVersion` must be `2`, and `ArtifactType` must be `fi
 
 ### Browsing reports
 
-Open `/ui` (Basic Auth, user `admin`) to see two tables — filesystem scans and image scans —
-filterable by project, each linking to a per-report detail page with full vulnerability,
-misconfiguration, and secret listings. The detail page has a delete button (with a confirmation
-prompt) that permanently removes the report and its findings.
+Open `/ui` (HTTP Basic Auth, any account created via `flask create-user`) to see two tables —
+filesystem scans and image scans — filterable by project, each linking to a per-report detail
+page with full vulnerability, misconfiguration, and secret listings. `admin` accounts additionally
+see a delete button (with a confirmation prompt) that permanently removes the report and its
+findings; `user` accounts don't see it, and the route itself rejects non-`admin` requests with a
+`403` regardless of what the UI shows.
 
 ### Health check
 
@@ -138,15 +157,9 @@ This is a deliberately small, single-purpose project — a few things are simpli
 - No automated test suite yet.
 - No rate limiting on the login/token checks — acceptable behind a private reverse proxy or VPN,
   not recommended for public exposure as-is.
-
-## Roadmap
-
-Not implemented yet, but planned next:
-
-- **Multi-user accounts with roles** — replace the single `admin` / `ADMIN_PASSWORD` Basic Auth
-  user with a proper user table supporting several accounts in two roles: `user` (read-only) and
-  `admin` (read-only plus deleting reports). Until this lands, deletion is available to anyone
-  who can authenticate to `/ui`, since there's only the one Basic Auth user.
+- No user management UI — accounts are managed only via the `flask create-user`/`delete-user`/
+  `list-users` CLI commands; there's no way to change a password without deleting and
+  recreating the account.
 
 ## License
 

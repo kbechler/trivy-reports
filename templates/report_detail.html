@@ -18,10 +18,12 @@
     <a href="{{ url_for('ui.splash') }}" class="back">← Back to report list</a>
     <a href="{{ url_for('ui.export_report_pdf', report_id=report.id) }}" class="back btn-outline primary">⭳ Export PDF</a>
     <a href="{{ url_for('ui.export_report_csv', report_id=report.id) }}" class="back btn-outline primary">⭳ Export CSV</a>
+    {% if current_user.role == 'admin' %}
     <form method="post" action="{{ url_for('ui.delete_report', report_id=report.id) }}" class="inline-form"
           onsubmit="return confirm('Delete this report? This cannot be undone.');">
       <button type="submit" class="back btn-outline danger">✕ Delete report</button>
     </form>
+    {% endif %}
   </div>
 
   <h1>{{ report.project or "Unnamed Project" }}</h1>

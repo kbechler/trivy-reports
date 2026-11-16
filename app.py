@@ -5,6 +5,7 @@ from flask import Flask, redirect, url_for
 from extensions import db
 from errors import register_error_handlers
 from auth import register_auth_check
+from cli import register_cli
 from api.v1 import v1
 from api.ui import ui
 
@@ -22,10 +23,8 @@ def create_app():
     # set variables
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.config['UPLOAD_TOKEN'] = os.getenv('UPLOAD_TOKEN')
-    app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')
 
     _require_secret('UPLOAD_TOKEN', app.config['UPLOAD_TOKEN'])
-    _require_secret('ADMIN_PASSWORD', app.config['ADMIN_PASSWORD'])
 
     # register blueprints
     app.register_blueprint(v1, url_prefix='/v1')
@@ -39,6 +38,7 @@ def create_app():
         db.create_all()
         register_error_handlers(app)
         register_auth_check(app)
+        register_cli(app)
 
     @app.route("/", methods=['GET'])
     def home():

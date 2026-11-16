@@ -1,6 +1,19 @@
 # auth.py
 import hmac
-from flask import request, jsonify, Response, current_app
+from functools import wraps
+from flask import request, jsonify, Response, g, abort
+from models.users import User
+
+
+def require_role(role):
+    def decorator(view):
+        @wraps(view)
+        def wrapped(*args, **kwargs):
+            if g.current_user.role != role:
+                abort(403)
+            return view(*args, **kwargs)
+        return wrapped
+    return decorator
 
 
 def register_auth_check(app):
@@ -16,11 +29,12 @@ def register_auth_check(app):
 
         if request.path.startswith('/ui'):  # Only protect UI routes
             auth = request.authorization
-            if (not auth or auth.username != 'admin'
-                    or not hmac.compare_digest(auth.password.encode(), current_app.config['ADMIN_PASSWORD'].encode())):
+            user = User.query.filter_by(username=auth.username).first() if auth else None
+            if not user or not user.check_password(auth.password):
                 return Response(
                     'Authentication required', 401,
                     {'WWW-Authenticate': 'Basic realm="Login Required"'}
                 )
+            g.current_user = user
 
         return None

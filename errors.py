@@ -4,6 +4,7 @@ from flask import jsonify
 
 def register_error_handlers(app):
     @app.errorhandler(400)
+    @app.errorhandler(403)
     @app.errorhandler(404)
     @app.errorhandler(405)
     @app.errorhandler(415)
