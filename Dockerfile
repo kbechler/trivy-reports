@@ -1,4 +1,4 @@
-FROM python:3.13.14-alpine
+FROM python:3.13-alpine
 
 RUN addgroup -g 9000 app \
     && adduser -D -u 9000 -G app app
