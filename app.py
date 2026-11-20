@@ -15,7 +15,13 @@ def _require_secret(name, value, min_length=8):
         raise RuntimeError(f"{name} must be set to a value of at least {min_length} characters")
 
 
-def create_app():
+def create_app(config=None):
+    """Build the Flask app.
+
+    `config` is an optional mapping applied on top of the values read from the
+    environment, so tests (or other callers) can override e.g. the database URI
+    without touching `.env`.
+    """
     load_dotenv()
 
     app = Flask(__name__)
@@ -23,6 +29,9 @@ def create_app():
     # set variables
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.config['UPLOAD_TOKEN'] = os.getenv('UPLOAD_TOKEN')
+
+    if config:
+        app.config.update(config)
 
     _require_secret('UPLOAD_TOKEN', app.config['UPLOAD_TOKEN'])
 
