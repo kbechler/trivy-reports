@@ -27,17 +27,17 @@ def create_app(config=None):
     app = Flask(__name__)
 
     # set variables
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-    app.config['UPLOAD_TOKEN'] = os.getenv('UPLOAD_TOKEN')
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
+    app.config["UPLOAD_TOKEN"] = os.getenv("UPLOAD_TOKEN")
 
     if config:
         app.config.update(config)
 
-    _require_secret('UPLOAD_TOKEN', app.config['UPLOAD_TOKEN'])
+    _require_secret("UPLOAD_TOKEN", app.config["UPLOAD_TOKEN"])
 
     # register blueprints
-    app.register_blueprint(v1, url_prefix='/v1')
-    app.register_blueprint(ui, url_prefix='/ui')
+    app.register_blueprint(v1, url_prefix="/v1")
+    app.register_blueprint(ui, url_prefix="/ui")
 
     # initialize database
     db.init_app(app)
@@ -49,17 +49,17 @@ def create_app(config=None):
         register_auth_check(app)
         register_cli(app)
 
-    @app.route("/", methods=['GET'])
+    @app.route("/", methods=["GET"])
     def home():
-        return redirect(url_for('ui.splash'))
+        return redirect(url_for("ui.splash"))
 
-    @app.route("/health", methods=['GET'])
+    @app.route("/health", methods=["GET"])
     def health():
         return "OK"
 
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     flask_app = create_app()
     flask_app.run()

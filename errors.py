@@ -9,4 +9,4 @@ def register_error_handlers(app):
     @app.errorhandler(405)
     @app.errorhandler(415)
     def err(e):
-        return jsonify({'code': e.code, 'status': 'err', 'message': e.description}), e.code
+        return jsonify({"code": e.code, "status": "err", "message": e.description}), e.code
