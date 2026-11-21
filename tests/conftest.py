@@ -4,6 +4,7 @@ import copy
 import pytest
 
 from app import create_app
+from extensions import db
 
 UPLOAD_TOKEN = "test-upload-token"
 
@@ -52,6 +53,9 @@ def app():
         }
     )
     with app.app_context():
+        # Temporary: tables straight from the models. Step 1.5 switches this to
+        # running the migrations, so tests exercise the real schema.
+        db.create_all()
         yield app
 
 

@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, redirect, url_for
-from extensions import db
+from extensions import db, migrate
 from errors import register_error_handlers
 from auth import register_auth_check
 from cli import register_cli
@@ -39,12 +39,12 @@ def create_app(config=None):
     app.register_blueprint(v1, url_prefix="/v1")
     app.register_blueprint(ui, url_prefix="/ui")
 
-    # initialize database
+    # initialize database; the schema itself is managed by migrations
+    # (`flask db upgrade`), not created here
     db.init_app(app)
+    migrate.init_app(app, db)
 
-    # initialize models
     with app.app_context():
-        db.create_all()
         register_error_handlers(app)
         register_auth_check(app)
         register_cli(app)
