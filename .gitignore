@@ -2,6 +2,7 @@ __pycache__
 .cache
 .vscode
 .env
+.python-version
 logs/*
 temp/*
 instance/site.db
