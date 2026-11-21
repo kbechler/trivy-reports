@@ -5,4 +5,4 @@ __pycache__
 .python-version
 logs/*
 temp/*
-instance/site.db
+instance/
