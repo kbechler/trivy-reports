@@ -1,4 +1,6 @@
 # extensions.py
+import os
+
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
@@ -21,4 +23,6 @@ db = SQLAlchemy(metadata=MetaData(naming_convention=NAMING_CONVENTION))
 # batch_alter_table() (copy table -> recreate -> swap), since SQLite can't
 # alter or drop most constraints in place. On PostgreSQL the same batch block
 # just emits plain ALTER TABLE statements, so migrations stay portable.
-migrate = Migrate(render_as_batch=True)
+# The directory is absolute so `flask db ...` and pytest work from any cwd.
+MIGRATIONS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "migrations")
+migrate = Migrate(directory=MIGRATIONS_DIR, render_as_batch=True)

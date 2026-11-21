@@ -3,7 +3,7 @@
 # Characterization tests for POST /v1/upload: they pin down how the endpoint
 # behaves today, so later refactors (migrations, new data model) can't change
 # it by accident.
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import pytest
 
@@ -29,14 +29,25 @@ def test_upload_container_image_stores_report(upload, make_report):
     assert report.size == 12345
 
 
-def test_upload_parses_created_at(upload, make_report):
+def test_upload_stores_created_at_as_utc(request, upload, make_report):
+    # Known issue (step 2.4): generated_at has no timezone, so the +01:00
+    # offset from the report is lost and what's stored depends on the backend.
+    # SQLite keeps the report's wall clock (16:07). PostgreSQL converts to the
+    # session timezone first, and only passes here because that's UTC in the
+    # test container; a server in another timezone would store yet another value.
+    if request.config.getoption("--db") == "sqlite":
+        request.applymarker(
+            pytest.mark.xfail(strict=True, reason="SQLite stores local wall clock; step 2.4")
+        )
+
     upload(make_report())
 
-    report = ScanReport.query.one()
-    # SQLite drops the UTC offset on storage, so only the wall-clock value
-    # survives the round trip (see the timezone item in the plan, step 2.4).
-    expected = datetime(2026, 11, 16, 16, 7, 52, 807626, tzinfo=timezone(timedelta(hours=1)))
-    assert report.generated_at.replace(tzinfo=None) == expected.replace(tzinfo=None)
+    stored = ScanReport.query.one().generated_at
+    if stored.tzinfo is not None:
+        stored = stored.astimezone(timezone.utc).replace(tzinfo=None)
+    # 2026-11-16T16:07:52.807626+01:00 in the report is 15:07:52 UTC
+    # (Python keeps microseconds; Trivy's nanoseconds are truncated).
+    assert stored == datetime(2026, 11, 16, 15, 7, 52, 807626)
 
 
 def test_upload_stores_vulnerabilities(upload, make_report):
